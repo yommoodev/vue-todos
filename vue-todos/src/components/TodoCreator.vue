@@ -1,19 +1,32 @@
 <script setup>
-import { ref, reactive } from "vue";
+import { reactive, defineEmits } from "vue";
 
-const todo = ref('Testing');
+const emit = defineEmits(['create-todo']);
 
 const todoState = reactive({
-    todo: "Testing reactive",
+    todo: "",
+    invalid: null,
+    errMsg: "",
 });
+
+const createTodo = () => {
+    todoState.invalid = null;
+    if (todoState.todo !== "") {
+        emit('create-todo', todoState.todo);
+        todoState.todo = ""
+        return;
+    }
+    todoState.invalid = true;
+    todoState.errMsg = "Todo value cannot be empty";
+}
 </script>
 
 <template>
-    <div class="input-wrap">
+    <div class="input-wrap" :class="{'input-err' : todoState.invalid}">
         <input type="text" v-model="todoState.todo"/>
-        <button>Create</button>
+        <button @click="createTodo()">Create</button>
     </div>
-    <p>{{ todoState.todo }}</p>
+    <p v-show="todoState.invalid" class="err-msg">{{ todoState.errMsg }}</p>
 </template>
 
 
@@ -23,6 +36,10 @@ const todoState = reactive({
   display: flex;
   transition: 250ms ease;
   border: 2px solid #41b080;
+
+  &.input-err {
+    border-color: red;
+  }
 
   &:focus-within {
     box-shadow: 0 -4px 6px -1px rgb(0 0 0 / 0.1),
@@ -43,5 +60,12 @@ const todoState = reactive({
     padding: 8px 16px;
     border: none;
   }
+}
+
+.err-msg {
+  margin-top: 6px;
+  font-size: 12px;
+  text-align: center;
+  color: red;
 }
 </style>
